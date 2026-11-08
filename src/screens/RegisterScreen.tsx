@@ -12,16 +12,54 @@ import { colors } from "../theme";
 
 export function RegisterScreen({ navigation, route }: RootScreenProps<"Register">) {
   const { signIn } = useAuth();
-  // TODO BT8.2: state name, email, password, confirm, errors (Record<string, string | null>), submitError, loading
-  // TODO BT8.2: hàm submit giống BT8.1, thêm luật: "Nhập lại mật khẩu" phải khớp mật khẩu
-  //   validateRequired("họ tên")(name) trả về hàm validate tên
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    const e = {
+      name: validateRequired("họ tên")(name),
+      email: validateEmail(email),
+      password: validatePassword(password),
+      confirm: confirm === password ? null : "Mật khẩu nhập lại không khớp",
+    };
+    setErrors(e);
+    if (Object.values(e).some(Boolean)) return;
+
+    setLoading(true);
+    setSubmitError(null);
+    try {
+      const { user, token } = await register(name, email, password);
+      signIn(user, token);
+      if (route.params?.redirectTo === "Checkout") {
+        navigation.replace("Checkout", { total: route.params.total ?? 0 });
+      } else {
+        navigation.navigate("Tabs", { screen: "Home" });
+      }
+    } catch (err) {
+      setSubmitError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Tạo tài khoản mới</Text>
 
-        <TodoBox id="BT8.2">{"Form đăng ký: 4 ô (Họ tên, Email, Mật khẩu, Nhập lại mật khẩu) + lỗi dưới từng ô + nút “Đăng ký”. Đăng ký xong tự đăng nhập."}</TodoBox>
+        <FormField label="Họ tên" value={name} onChangeText={setName} error={errors.name} />
+        <FormField label="Email" value={email} onChangeText={setEmail} error={errors.email} keyboardType="email-address" />
+        <FormField label="Mật khẩu" value={password} onChangeText={setPassword} error={errors.password} secureTextEntry />
+        <FormField label="Nhập lại mật khẩu" value={confirm} onChangeText={setConfirm} error={errors.confirm} secureTextEntry />
+
+        {submitError ? <Text style={styles.submitError}>{submitError}</Text> : null}
+
+        <PrimaryButton title="Đăng ký" onPress={submit} loading={loading} />
 
         <Pressable onPress={() => navigation.replace("Login", route.params)}>
           <Text style={styles.link}>Đã có tài khoản? Đăng nhập</Text>
