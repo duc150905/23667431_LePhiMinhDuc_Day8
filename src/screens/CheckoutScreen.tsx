@@ -1,12 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { RootScreenProps } from "../navigation/types";
 import { colors, formatPrice } from "../theme";
+import { useAuth } from "../store/hooks";
 
 // KHUNG TỐI GIẢN: form địa chỉ + đặt hàng làm ở buổi sau.
-// TODO BT8.4 (lớp bảo vệ thứ 2): dùng useAuth() → isLoggedIn; trong useEffect, nếu chưa đăng nhập thì
-//   navigation.replace("Login", { redirectTo: "Checkout", total: route.params.total }); chưa đăng nhập thì return null.
-export function CheckoutScreen({ route }: RootScreenProps<"Checkout">) {
+export function CheckoutScreen({ navigation, route }: RootScreenProps<"Checkout">) {
+  const { isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigation.replace("Login", { redirectTo: "Checkout", total: route.params.total });
+    }
+  }, [isLoggedIn, navigation, route.params.total]);
+
+  if (!isLoggedIn) return null;
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Tổng tiền cần thanh toán</Text>

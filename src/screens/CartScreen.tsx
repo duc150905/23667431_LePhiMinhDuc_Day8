@@ -6,12 +6,13 @@ import { CartItemRow } from "../components/CartItemRow";
 import { PrimaryButton } from "../components/PrimaryButton";
 
 import { EmptyState } from "../components/EmptyState";
-import { useCart } from "../store/hooks";
+import { useAuth, useCart } from "../store/hooks";
 import { confirmDialog } from "../utils/dialog"; // đã viết sẵn — dùng ở BT8.7a
 import { TabScreenProps } from "../navigation/types";
 import { colors, formatPrice } from "../theme";
 
 export function CartScreen({ navigation }: TabScreenProps<"Cart">) {
+  const { isLoggedIn } = useAuth();
   const { items, totalPrice, setQty, remove } = useCart();
   const finalTotal = totalPrice; // TODO BT8.C2 (thử thách): trừ mã giảm giá → finalTotal = totalPrice - discount
 
@@ -21,10 +22,12 @@ export function CartScreen({ navigation }: TabScreenProps<"Cart">) {
     remove(bookId);
   };
 
-  // TODO BT8.4: bảo vệ Checkout — nếu isLoggedIn → navigate("Checkout", { total: finalTotal })
-  //   chưa đăng nhập → navigate("Login", { redirectTo: "Checkout", total: finalTotal })
   const goCheckout = () => {
-    navigation.navigate("Checkout", { total: finalTotal });
+    if (isLoggedIn) {
+      navigation.navigate("Checkout", { total: finalTotal });
+    } else {
+      navigation.navigate("Login", { redirectTo: "Checkout", total: finalTotal });
+    }
   };
 
   return (
