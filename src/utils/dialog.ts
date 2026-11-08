@@ -13,7 +13,15 @@ export function showMessage(title: string, message?: string, onOk?: () => void) 
 
 export function confirmDialog(title: string, message: string, onConfirm: () => void, confirmText = "Xóa") {
   if (Platform.OS === "web") {
-    if (window.confirm(`${title}\n${message}`)) onConfirm();
+    setTimeout(() => {
+      if (typeof window !== "undefined") {
+        if (window.confirm(`${title}\n${message}`)) {
+          onConfirm();
+        }
+      } else {
+        onConfirm();
+      }
+    }, 10);
   } else {
     Alert.alert(title, message, [
       { text: "Hủy", style: "cancel" },

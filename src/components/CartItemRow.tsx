@@ -58,7 +58,12 @@ export function CartItemRow({ item, onChangeQty, onRemove }: Props) {
           <Text style={styles.stockText}>Còn {item.stock}</Text>
         </View>
       </View>
-      <Pressable onPress={() => onRemove(item.bookId)} hitSlop={8} accessibilityLabel="Xóa khỏi giỏ">
+      <Pressable
+        style={styles.trashBtn}
+        onPress={() => onRemove(item.bookId)}
+        hitSlop={15}
+        accessibilityLabel="Xóa khỏi giỏ"
+      >
         <Text style={styles.trash}>🗑️</Text>
       </Pressable>
     </View>
@@ -78,5 +83,6 @@ const styles = StyleSheet.create({
   btnText: { fontSize: 16, fontWeight: "700", color: colors.text },
   qtyText: { fontSize: 15, fontWeight: "800", color: colors.navy, minWidth: 20, textAlign: "center" },
   stockText: { fontSize: 12, color: colors.muted, marginLeft: 4 },
+  trashBtn: { padding: 8, minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" },
   trash: { fontSize: 22 },
 });
